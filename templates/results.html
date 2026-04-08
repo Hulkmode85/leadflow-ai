@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadFlow AI - Results</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; padding: 2rem; }
+        .header { max-width: 1200px; margin: 0 auto 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .header-left h1 { font-size: 1.5rem; background: linear-gradient(135deg, #00d2ff, #7b2ff7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-left .query-label { color: #666; font-size: 0.9rem; margin-top: 0.3rem; }
+        .header-right { display: flex; gap: 0.8rem; }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, #00d2ff, #7b2ff7); color: #fff; }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.12); }
+        .lead-grid { max-width: 1200px; margin: 0 auto; display: grid; gap: 1rem; }
+        .lead-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem; display: grid; grid-template-columns: 60px 1fr auto; gap: 1.5rem; align-items: start; transition: border-color 0.2s; }
+        .lead-card:hover { border-color: rgba(0, 210, 255, 0.3); }
+        .score-circle { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; }
+        .score-high { background: rgba(0, 210, 100, 0.2); color: #00d264; border: 2px solid #00d264; }
+        .score-mid { background: rgba(255, 180, 0, 0.2); color: #ffb400; border: 2px solid #ffb400; }
+        .score-low { background: rgba(255, 60, 60, 0.15); color: #ff6b6b; border: 2px solid #ff6b6b; }
+        .lead-info h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+        .lead-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.85rem; color: #888; margin-bottom: 0.6rem; }
+        .lead-meta a { color: #00d2ff; text-decoration: none; }
+        .lead-meta a:hover { text-decoration: underline; }
+        .lead-reasoning { font-size: 0.85rem; color: #999; margin-bottom: 0.4rem; font-style: italic; }
+        .lead-approach { font-size: 0.85rem; color: #7b2ff7; font-weight: 500; }
+        .lead-rating { text-align: right; white-space: nowrap; }
+        .stars { color: #ffb400; font-size: 0.9rem; }
+        .review-count { color: #666; font-size: 0.8rem; display: block; margin-top: 0.2rem; }
+        .summary-bar { max-width: 1200px; margin: 0 auto 1.5rem; display: flex; gap: 2rem; padding: 1rem 1.5rem; background: rgba(255,255,255,0.03); border-radius: 10px; font-size: 0.9rem; }
+        .summary-bar .stat-label { color: #666; }
+        .summary-bar .stat-value { color: #00d2ff; font-weight: 600; }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #666; }
+        @media (max-width: 700px) { .lead-card { grid-template-columns: 50px 1fr; } .lead-rating { grid-column: 2; text-align: left; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>LeadFlow AI Results</h1>
+            <div class="query-label">{{ query }} &mdash; {{ leads|length }} leads scored</div>
+        </div>
+        <div class="header-right">
+            <a href="/search" class="btn btn-secondary">New Search</a>
+            <form method="POST" action="/export" style="display:inline;">
+                <input type="hidden" name="leads" id="leadsData">
+                <button type="submit" class="btn btn-primary" id="exportBtn">Export CSV</button>
+            </form>
+        </div>
+    </div>
+    {% if leads %}
+    <div class="summary-bar">
+        <div><span class="stat-label">Total leads: </span><span class="stat-value">{{ leads|length }}</span></div>
+        <div><span class="stat-label">High priority (8+): </span><span class="stat-value">{{ leads|selectattr('score', 'ge', 8)|list|length }}</span></div>
+        <div><span class="stat-label">Avg score: </span><span class="stat-value">{{ "%.1f"|format(leads|map(attribute='score')|list|sum / leads|length) }}</span></div>
+    </div>
+    <div class="lead-grid">
+        {% for lead in leads %}
+        <div class="lead-card">
+            <div class="score-circle {% if lead.score >= 8 %}score-high{% elif lead.score >= 5 %}score-mid{% else %}score-low{% endif %}">{{ lead.score }}</div>
+            <div class="lead-info">
+                <h3>{{ lead.name }}</h3>
+                <div class="lead-meta">
+                    {% if lead.phone %}<span>{{ lead.phone }}</span>{% endif %}
+                    {% if lead.email %}<span><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></span>{% endif %}
+                    {% if lead.website %}<span><a href="{{ lead.website }}" target="_blank">Website</a></span>{% endif %}
+                    {% if lead.address %}<span>{{ lead.address }}</span>{% endif %}
+                </div>
+                <div class="lead-reasoning">{{ lead.reasoning }}</div>
+                <div class="lead-approach">{{ lead.approach }}</div>
+            </div>
+            <div class="lead-rating">
+                <span class="stars">{% for i in range(5) %}{% if lead.rating >= i + 0.75 %}&#9733;{% elif lead.rating >= i + 0.25 %}&#9734;{% else %}&#9734;{% endif %}{% endfor %}</span>
+                <span class="review-count">{{ lead.rating }}/5 ({{ lead.review_count }})</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No leads found. Try a different search query.</p></div>
+    {% endif %}
+    <script>
+        const leads = {{ leads|tojson }};
+        document.getElementById('leadsData').value = JSON.stringify(leads);
+    </script>
+</body>
+</html>
