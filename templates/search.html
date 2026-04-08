@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadFlow AI - Search</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { max-width: 600px; width: 100%; padding: 2rem; }
+        .back-link { color: #666; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 2rem; }
+        .back-link:hover { color: #00d2ff; }
+        h1 { font-size: 2rem; background: linear-gradient(135deg, #00d2ff, #7b2ff7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        .subtitle { color: #666; margin-bottom: 2rem; }
+        .search-form { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 2rem; }
+        label { display: block; font-size: 0.9rem; color: #999; margin-bottom: 0.5rem; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 0.8rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: #e0e0e0; font-size: 1rem; margin-bottom: 1.5rem; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #00d2ff; }
+        input::placeholder { color: #555; }
+        .row { display: flex; gap: 1rem; }
+        .row > div { flex: 1; }
+        .submit-btn { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #00d2ff, #7b2ff7); border: none; border-radius: 8px; color: #fff; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(0, 210, 255, 0.3); }
+        .submit-btn:disabled { opacity: 0.6; cursor: wait; }
+        .error { background: rgba(255, 60, 60, 0.15); border: 1px solid rgba(255, 60, 60, 0.3); color: #ff6b6b; padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .examples { margin-top: 1.5rem; font-size: 0.85rem; color: #555; }
+        .examples span { display: inline-block; background: rgba(255,255,255,0.05); padding: 0.3rem 0.7rem; border-radius: 20px; margin: 0.3rem 0.2rem; cursor: pointer; transition: background 0.2s; }
+        .examples span:hover { background: rgba(0, 210, 255, 0.15); color: #00d2ff; }
+        .mode-badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1.5rem; }
+        .mode-mock { background: rgba(255, 180, 0, 0.15); color: #ffb400; border: 1px solid rgba(255, 180, 0, 0.3); }
+        .mode-live { background: rgba(0, 210, 100, 0.15); color: #00d264; border: 1px solid rgba(0, 210, 100, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">&larr; Back to home</a>
+        <h1>Search Leads</h1>
+        <p class="subtitle">Enter a niche and location to find and score businesses.</p>
+        <div class="search-form">
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
+            <span class="mode-badge mode-mock" id="modeBadge">MOCK DATA MODE</span>
+            <form method="POST" action="/results" id="searchForm">
+                <label for="query">Business niche + location</label>
+                <input type="text" name="query" id="query" placeholder="e.g., dentists in San Jose, CA" required>
+                <div class="row"><div>
+                    <label for="count">Number of leads</label>
+                    <input type="number" name="count" id="count" value="15" min="1" max="30">
+                </div></div>
+                <button type="submit" class="submit-btn" id="submitBtn">Find & Score Leads</button>
+            </form>
+            <div class="examples">
+                Try:
+                <span onclick="setQuery('dentists in San Jose, CA')">dentists in San Jose, CA</span>
+                <span onclick="setQuery('plumbers in Austin, TX')">plumbers in Austin, TX</span>
+                <span onclick="setQuery('restaurants in Miami, FL')">restaurants in Miami, FL</span>
+                <span onclick="setQuery('lawyers in Chicago, IL')">lawyers in Chicago, IL</span>
+                <span onclick="setQuery('salons in Portland, OR')">salons in Portland, OR</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        function setQuery(q) { document.getElementById('query').value = q; }
+        document.getElementById('searchForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Searching & scoring...';
+        });
+    </script>
+</body>
+</html>
